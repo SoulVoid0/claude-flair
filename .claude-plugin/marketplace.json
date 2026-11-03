@@ -1,0 +1,6 @@
+{
+  "name": "flair",
+  "owner": { "name": "SoulVoid0" },
+  "metadata": { "description": "Themes and a token counter for Claude Code" },
+  "plugins": [{ "name": "flair", "source": "./" }]
+}

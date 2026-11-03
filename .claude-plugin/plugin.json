@@ -1,0 +1,8 @@
+{
+  "name": "flair",
+  "version": "0.1.0",
+  "description": "Themes for Claude Code (JoJo-style Menacing, Diamond Heart, Golden Breeze) with a theme selector, plus an all-time token counter",
+  "author": { "name": "SoulVoid0" },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}
