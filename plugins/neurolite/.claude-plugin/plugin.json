@@ -1,7 +1,7 @@
 {
   "name": "neurolite",
   "displayName": "NeuroLite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Intelligent AI efficiency system: response modes (normal, efficient, ultra, caveman, developer), local project memory, token-efficient file tools, and an efficiency dashboard",
   "author": { "name": "SoulVoid0", "url": "https://github.com/SoulVoid0" },
   "homepage": "https://github.com/SoulVoid0/claude-flair/tree/main/plugins/neurolite",
