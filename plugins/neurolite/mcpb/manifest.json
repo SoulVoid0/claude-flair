@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "neurolite",
   "display_name": "NeuroLite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Local project memory, persistent response modes, token-efficient file tools and an efficiency dashboard for Claude Desktop.",
   "long_description": "NeuroLite runs locally with no network access and no dependencies. It stores compact per-project memory (architecture, decisions, bugs, tasks) and a handoff summary on your computer, rejects secrets, keeps your response mode (normal, efficient, ultra, caveman, developer) across chats, and gives Claude ranged file reads, targeted search, log triage, project indexing and code-health scans inside the folders you allow. Pair it with the NeuroLite plugin for the /neurolite:* commands.",
   "author": { "name": "SoulVoid0", "url": "https://github.com/SoulVoid0" },

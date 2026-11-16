@@ -7,18 +7,46 @@
 //   allowedFolder   folders the file tools may read (Claude Desktop extension settings)
 // Env:  NEUROLITE_HOME   data directory      NEUROLITE_ROOTS  extra allowed folders (; separated)
 
-const readline = require('readline');
 const { Store } = require('./lib/store');
 const { Tools } = require('./lib/tools');
 const { parseRoots } = require('./lib/files');
 const pkg = require('./package.json');
+
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+// Diagnostics go to %TEMP%/neurolite-mcp.log (always writable, even for sandboxed hosts),
+// never to stdout, which carries the protocol.
+const LOG = path.join(os.tmpdir(), 'neurolite-mcp.log');
+function log(msg) {
+  try {
+    if (fs.existsSync(LOG) && fs.statSync(LOG).size > 256 * 1024) fs.renameSync(LOG, LOG + '.old');
+    fs.appendFileSync(LOG, `${new Date().toISOString()} [${process.pid}] ${msg}\n`);
+  } catch {}
+}
+
+/** Open the data store; fall back to ~/.neurolite, then the temp folder, so startup never fails. */
+function openStore(env) {
+  const { resolveHome } = require('./lib/store');
+  for (const home of [resolveHome(env), path.join(os.homedir(), '.neurolite'), path.join(os.tmpdir(), 'neurolite')]) {
+    try {
+      const s = new Store(home);
+      log(`data folder: ${home}`);
+      return s;
+    } catch (e) {
+      log(`data folder ${home} unusable: ${e.message}`);
+    }
+  }
+  throw new Error('No writable data folder');
+}
 
 const PROTOCOLS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
 
 function makeServer({ argv = process.argv.slice(2), env = process.env, cwd = process.cwd() } = {}) {
   const useCwd = argv.includes('--use-cwd');
   const roots = parseRoots([...argv.filter((a) => !a.startsWith('--')), ...(env.NEUROLITE_ROOTS ? [env.NEUROLITE_ROOTS] : []), ...(useCwd ? [cwd] : [])]);
-  const store = new Store(require('./lib/store').resolveHome(env));
+  const store = openStore(env);
   const tools = new Tools({ store, roots, cwdRoot: useCwd ? cwd : null });
 
   function handle(msg) {
@@ -63,26 +91,58 @@ function makeServer({ argv = process.argv.slice(2), env = process.env, cwd = pro
 }
 
 function main() {
-  const server = makeServer();
-  const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
-  rl.on('line', (line) => {
-    line = line.replace(/^\uFEFF/, '');
-    if (!line.trim()) return;
+  process.on('uncaughtException', (e) => log(`uncaught: ${e.stack}`));
+  process.on('unhandledRejection', (e) => log(`unhandled: ${e && e.stack}`));
+  log(`start node ${process.version} exec=${process.execPath} cwd=${process.cwd()} argv=${JSON.stringify(process.argv.slice(2))} home=${JSON.stringify(process.env.NEUROLITE_HOME || '')}`);
+  let server;
+  try {
+    server = makeServer();
+  } catch (e) {
+    log(`startup failed: ${e.stack}`);
+    process.exit(1);
+  }
+  const send = (obj) => process.stdout.write(JSON.stringify(obj) + '\n');
+  const onLine = (raw) => {
+    const line = raw.replace(/^\uFEFF/, '').trim();
+    if (!line) return;
     let msg;
     try {
       msg = JSON.parse(line);
     } catch {
-      process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } }) + '\n');
+      log(`parse error: ${line.slice(0, 200)}`);
+      send({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } });
       return;
     }
-    const batch = Array.isArray(msg) ? msg : [msg];
-    for (const m of batch) {
-      const res = server.handle(m);
-      if (res) process.stdout.write(JSON.stringify(res) + '\n');
+    for (const m of Array.isArray(msg) ? msg : [msg]) {
+      if (m.method === 'initialize' || m.method === 'tools/list') log(`recv ${m.method}`);
+      let res;
+      try {
+        res = server.handle(m);
+      } catch (e) {
+        log(`handler error: ${e.stack}`);
+        res = m.id != null ? { jsonrpc: '2.0', id: m.id, error: { code: -32603, message: e.message } } : null;
+      }
+      if (res) send(res);
+    }
+  };
+  // Same newline-delimited framing the official SDK uses: raw 'data' events, manual split.
+  let buf = '';
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', (chunk) => {
+    buf += chunk;
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i);
+      buf = buf.slice(i + 1);
+      onLine(line);
     }
   });
-  rl.on('close', () => process.exit(0));
-  process.on('uncaughtException', (e) => process.stderr.write(`neurolite: ${e.stack}\n`));
+  process.stdin.on('end', () => {
+    if (buf.trim()) onLine(buf);
+    log('stdin closed, exiting');
+    process.exit(0);
+  });
+  process.stdin.resume();
 }
 
 if (require.main === module) main();
