@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "neurolite": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/index.js", "--use-cwd"]
+    }
+  }
+}

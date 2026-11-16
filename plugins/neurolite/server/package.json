@@ -1,0 +1,9 @@
+{
+  "name": "neurolite-server",
+  "version": "1.0.0",
+  "description": "NeuroLite local MCP server: project memory, response modes and token-efficient file tools",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "engines": { "node": ">=18" }
+}

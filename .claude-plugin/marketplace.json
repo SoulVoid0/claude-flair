@@ -1,6 +1,14 @@
 {
   "name": "flair",
   "owner": { "name": "SoulVoid0" },
-  "metadata": { "description": "Themes and a token counter for Claude Code" },
-  "plugins": [{ "name": "flair", "source": "./" }]
+  "metadata": { "description": "SoulVoid0's Claude plugins: flair (themes + token counter) and NeuroLite (efficiency system)" },
+  "plugins": [
+    { "name": "flair", "source": "./", "description": "Themes and a token counter for Claude Code" },
+    {
+      "name": "neurolite",
+      "source": "./plugins/neurolite",
+      "description": "NeuroLite: response modes, local project memory, token-efficient file tools and an efficiency dashboard",
+      "category": "productivity"
+    }
+  ]
 }
