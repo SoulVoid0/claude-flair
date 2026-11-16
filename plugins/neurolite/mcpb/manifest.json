@@ -1,0 +1,56 @@
+{
+  "manifest_version": "0.3",
+  "name": "neurolite",
+  "display_name": "NeuroLite",
+  "version": "1.0.0",
+  "description": "Local project memory, persistent response modes, token-efficient file tools and an efficiency dashboard for Claude Desktop.",
+  "long_description": "NeuroLite runs locally with no network access and no dependencies. It stores compact per-project memory (architecture, decisions, bugs, tasks) and a handoff summary on your computer, rejects secrets, keeps your response mode (normal, efficient, ultra, caveman, developer) across chats, and gives Claude ranged file reads, targeted search, log triage, project indexing and code-health scans inside the folders you allow. Pair it with the NeuroLite plugin for the /neurolite:* commands.",
+  "author": { "name": "SoulVoid0", "url": "https://github.com/SoulVoid0" },
+  "repository": { "type": "git", "url": "https://github.com/SoulVoid0/claude-flair.git" },
+  "homepage": "https://github.com/SoulVoid0/claude-flair/tree/main/plugins/neurolite",
+  "support": "https://github.com/SoulVoid0/claude-flair/issues",
+  "icon": "icon.png",
+  "license": "MIT",
+  "keywords": ["memory", "efficiency", "tokens", "productivity", "coding"],
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js", "${user_config.allowed_folders}"],
+      "env": { "NEUROLITE_HOME": "${user_config.data_folder}" }
+    }
+  },
+  "tools": [
+    { "name": "nl_mode", "description": "Get or set the persistent response mode" },
+    { "name": "nl_project", "description": "List, switch, create, inspect or delete independent projects" },
+    { "name": "nl_context", "description": "Handoff summary plus only the memories relevant to a task" },
+    { "name": "nl_memory", "description": "Add, update, search, list, mark stale or delete project memories" },
+    { "name": "nl_handoff", "description": "Read or replace the compact project handoff summary" },
+    { "name": "nl_files", "description": "Build and query a project file index; detect languages and frameworks" },
+    { "name": "nl_read", "description": "Ranged or grep-filtered file reads with unchanged-file detection" },
+    { "name": "nl_grep", "description": "Targeted regex search across allowed folders" },
+    { "name": "nl_log", "description": "Local log triage: unique errors with counts and short traces" },
+    { "name": "nl_scan", "description": "Unused dependencies, duplicated code, outdated instructions, stale memories" },
+    { "name": "nl_stats", "description": "Efficiency dashboard with measured numbers only" }
+  ],
+  "compatibility": {
+    "platforms": ["win32", "darwin", "linux"],
+    "runtimes": { "node": ">=18.0.0" }
+  },
+  "user_config": {
+    "allowed_folders": {
+      "type": "directory",
+      "title": "Allowed folders",
+      "description": "Folders NeuroLite's file tools may read (read-only). Pick your project folders, e.g. A:\\Claude Workplace.",
+      "multiple": true,
+      "required": false
+    },
+    "data_folder": {
+      "type": "directory",
+      "title": "Data folder (optional)",
+      "description": "Where memory and settings are stored. Leave empty for the default: A:\\Claude Workplace\\NeuroLite\\data on Windows when an A: drive exists, otherwise ~/.neurolite.",
+      "required": false
+    }
+  }
+}

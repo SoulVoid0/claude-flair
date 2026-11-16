@@ -1,4 +1,11 @@
-# claude-flair (plugin: `flair`)
+# claude-flair
+
+A plugin marketplace with two plugins:
+
+- **NeuroLite** (`neurolite`): efficiency system with response modes (`/neurolite:normal|efficient|ultra|caveman|developer`), local project memory, token-efficient file tools and `/neurolite:stats`. Works in Claude Desktop Chat, Cowork and Claude Code. See [plugins/neurolite/README.md](plugins/neurolite/README.md). Downloads: [neurolite.mcpb](plugins/neurolite/dist/neurolite.mcpb) (Desktop extension), [neurolite-plugin.zip](plugins/neurolite/dist/neurolite-plugin.zip).
+- **flair** (`flair`): themes and a token counter for Claude Code, described below.
+
+## flair
 
 Themes and a token counter for Claude Code.
 
