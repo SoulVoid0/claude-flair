@@ -66,6 +66,7 @@ function main() {
   const server = makeServer();
   const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
   rl.on('line', (line) => {
+    line = line.replace(/^\uFEFF/, '');
     if (!line.trim()) return;
     let msg;
     try {
